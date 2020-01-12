@@ -3,7 +3,7 @@ package com.ekocbiyik.demo.exceptions;
 /**
  * ekocbiyik on 11.01.2020
  */
-public class DemoExceptionCode {
+public class DemoExceptionCodeUtils {
 
     public static final int NULL_PARAMETER = 300;
     public static final int EMPTY_CAMPAIGN = 301;

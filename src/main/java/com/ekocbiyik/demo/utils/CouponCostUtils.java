@@ -1,7 +1,7 @@
 package com.ekocbiyik.demo.utils;
 
 import com.ekocbiyik.demo.exceptions.DemoException;
-import com.ekocbiyik.demo.exceptions.DemoExceptionCode;
+import com.ekocbiyik.demo.exceptions.DemoExceptionCodeUtils;
 import com.ekocbiyik.demo.model.Coupon;
 import com.ekocbiyik.demo.model.DiscountType;
 
@@ -22,17 +22,12 @@ public class CouponCostUtils {
         Double totalDiscount = 0.0;
 
         for (Coupon coupon : couponList) {
-            if (coupon.getDiscountType() == DiscountType.RATE) {
-                if ((totalAmount - totalDiscount) >= coupon.getMinPurchase()) {
-                    totalDiscount = validateCoupon((totalAmount * coupon.getDiscountAmount() / 100), totalAmount);
-
-                }
+            if (coupon.getDiscountType() == DiscountType.RATE && (totalAmount - totalDiscount) >= coupon.getMinPurchase()) {
+                totalDiscount = validateCoupon((totalAmount * coupon.getDiscountAmount() / 100), totalAmount);
             }
 
-            if (coupon.getDiscountType() == DiscountType.PRICE) {
-                if ((totalAmount - totalDiscount) > coupon.getMinPurchase()) {
-                    totalDiscount = coupon.getDiscountAmount();
-                }
+            if (coupon.getDiscountType() == DiscountType.PRICE && ((totalAmount - totalDiscount) > coupon.getMinPurchase())) {
+                totalDiscount = coupon.getDiscountAmount();
             }
         }
         return totalDiscount;
@@ -40,7 +35,7 @@ public class CouponCostUtils {
 
     private static Double validateCoupon(Double totalDiscount, Double totalAmount) throws DemoException {
         if (totalDiscount > totalAmount) {
-            throw new DemoException(DemoExceptionCode.INVALID_COUPON, "Invalid Coupon");
+            throw new DemoException(DemoExceptionCodeUtils.INVALID_COUPON, "Invalid Coupon");
         }
         return totalDiscount;
     }

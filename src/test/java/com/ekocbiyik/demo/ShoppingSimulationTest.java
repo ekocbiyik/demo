@@ -6,12 +6,11 @@ import com.ekocbiyik.demo.model.*;
 import com.ekocbiyik.demo.utils.DeliveryCostUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ekocbiyik on 11.01.2020
@@ -20,71 +19,9 @@ import java.util.*;
 @SpringBootTest
 public class ShoppingSimulationTest {
 
-    private final Logger logger = LoggerFactory.getLogger(ShoppingSimulationTest.class);
-
     private Map<String, Category> categoryMap = new HashMap<>();
     private Map<String, Product> productMap = new HashMap<>();
     private ShoppingCart cart;
-
-    @Test
-    public void shoppingWithoutAnyDiscountTest() throws DemoException {
-        cart = new ShoppingCart();
-        cart.addItem(productMap.get("dfctErkekKazak"), 1);
-        cart.addItem(productMap.get("usErkekHirka"), 1);
-        cart.addItem(productMap.get("mpKrmpn"), 1);
-        cart.print();
-
-        DeliveryCostUtils delivery = new DeliveryCostUtils(12.0, 10.0, 2.99);
-        logger.info("Delivery Cost: {}", delivery.calculateFor(cart));
-
-        Assert.isTrue(cart.getTotalAmountAfterDiscounts() == 216.44, "result true");
-    }
-
-    @Test
-    public void shoppingWithCampaignRateDiscountTest() throws DemoException {
-        cart = new ShoppingCart();
-        cart.addItem(productMap.get("pcErkekKazak"), 2);
-        cart.addItem(productMap.get("lcwErkekHirka"), 2);
-        cart.addItem(productMap.get("pumaAykb"), 1);
-
-        // kamp1: giyim kategorisinde 2 ürün alana %25 indirm
-        Campaign campaign1 = new Campaign(categoryMap.get("giyim"), 25.0, 2, DiscountType.RATE);
-
-        // kamp2: hırka kategorisinde 2 ürüne 20 TL indirim
-        Campaign campaign2 = new Campaign(categoryMap.get("hirka"), 20.0, 2, DiscountType.PRICE);
-
-        // kamp3: yürüyüş ayakkabısında 1 üründe %30 indirim
-        Campaign campaign3 = new Campaign(categoryMap.get("yuruyusAyakkabisi"), 30.0, 1, DiscountType.RATE);
-
-        cart.applyDiscount(campaign1, campaign2, campaign3);
-
-        cart.print();
-
-        DeliveryCostUtils delivery = new DeliveryCostUtils(12.0, 10.0, 2.99);
-        logger.info("Delivery Cost: {}", delivery.calculateFor(cart));
-
-        Assert.isTrue(cart.getTotalAmountAfterDiscounts() == 425.0, "result true");
-    }
-
-    @Test
-    public void shoppingWithCouponDiscountTest() throws DemoException {
-        cart = new ShoppingCart();
-        cart.addItem(productMap.get("pcErkekKazak"), 2);
-        cart.addItem(productMap.get("lcwErkekHirka"), 2);
-        cart.addItem(productMap.get("pumaAykb"), 1);
-
-        // kamp1: min 100 TL alışverişe %10 indirim
-        Coupon coupon1 = new Coupon(100.0, 40.0, DiscountType.RATE);
-        cart.applyCoupon(coupon1);
-
-        Coupon coupon2 = new Coupon(200.0, 100.0, DiscountType.PRICE);
-        cart.applyCoupon(coupon2);
-
-        DeliveryCostUtils delivery = new DeliveryCostUtils(12.0, 10.0, 2.99);
-        delivery.calculateFor(cart);
-
-        Assert.isTrue(cart.getTotalAmountAfterDiscounts().equals(354.0), "wrong result");
-    }
 
     @BeforeEach
     public void initializeItems() {
@@ -124,6 +61,63 @@ public class ShoppingSimulationTest {
 //        productMap.put("nikeAykb", new Product("NIKE Ayakkabı", 479.88, yuruyusAyakkabisi));
 //        productMap.put("polarisAykb", new Product("Polaris Ayakkabı", 34.99, yuruyusAyakkabisi));
 //        productMap.put("walkedKrmpn", new Product("Walked Krampon", 59.90, futbolAyakkabisi));
+    }
+
+    @Test
+    public void shoppingWithoutAnyDiscountTest() throws DemoException {
+        cart = new ShoppingCart();
+        cart.addItem(productMap.get("dfctErkekKazak"), 1);
+        cart.addItem(productMap.get("usErkekHirka"), 1);
+        cart.addItem(productMap.get("mpKrmpn"), 1);
+
+        DeliveryCostUtils delivery = new DeliveryCostUtils(12.0, 10.0, 2.99);
+        delivery.calculateFor(cart);
+
+        assert cart.getTotalAmountAfterDiscounts().equals(216.44);
+    }
+
+    @Test
+    public void shoppingWithCampaignRateDiscountTest() throws DemoException {
+        cart = new ShoppingCart();
+        cart.addItem(productMap.get("pcErkekKazak"), 2);
+        cart.addItem(productMap.get("lcwErkekHirka"), 2);
+        cart.addItem(productMap.get("pumaAykb"), 1);
+
+        // kamp1: giyim kategorisinde 2 ürün alana %25 indirm
+        Campaign campaign1 = new Campaign(categoryMap.get("giyim"), 25.0, 2, DiscountType.RATE);
+
+        // kamp2: hırka kategorisinde 2 ürüne 20 TL indirim
+        Campaign campaign2 = new Campaign(categoryMap.get("hirka"), 20.0, 2, DiscountType.PRICE);
+
+        // kamp3: yürüyüş ayakkabısında 1 üründe %30 indirim
+        Campaign campaign3 = new Campaign(categoryMap.get("yuruyusAyakkabisi"), 30.0, 1, DiscountType.RATE);
+
+        cart.applyDiscount(campaign1, campaign2, campaign3);
+
+        DeliveryCostUtils delivery = new DeliveryCostUtils(12.0, 10.0, 2.99);
+        delivery.calculateFor(cart);
+
+        assert cart.getTotalAmountAfterDiscounts().equals(425.0);
+    }
+
+    @Test
+    public void shoppingWithCouponDiscountTest() throws DemoException {
+        cart = new ShoppingCart();
+        cart.addItem(productMap.get("pcErkekKazak"), 2);
+        cart.addItem(productMap.get("lcwErkekHirka"), 2);
+        cart.addItem(productMap.get("pumaAykb"), 1);
+
+        // kamp1: min 100 TL alışverişe %10 indirim
+        Coupon coupon1 = new Coupon(100.0, 40.0, DiscountType.RATE);
+        cart.applyCoupon(coupon1);
+
+        Coupon coupon2 = new Coupon(200.0, 100.0, DiscountType.PRICE);
+        cart.applyCoupon(coupon2);
+
+        DeliveryCostUtils delivery = new DeliveryCostUtils(12.0, 10.0, 2.99);
+        delivery.calculateFor(cart);
+
+        assert cart.getTotalAmountAfterDiscounts().equals(490.0);
     }
 
 }

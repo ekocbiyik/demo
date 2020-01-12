@@ -29,6 +29,8 @@ class ModelInitializeTest {
         logger.info(kazakHirka.getDescription());
         logger.info(kazak.getDescription());
         logger.info(hirka.getDescription());
+
+        assert true;
     }
 
     @Test
@@ -44,6 +46,8 @@ class ModelInitializeTest {
         Assert.notNull(pcErkekKazak, "Null Product!");
         Assert.notNull(ogErkekKazak, "Null Product!");
         logger.info(pcErkekKazak.getDescription());
+
+        assert true;
     }
 
     @Test
@@ -60,6 +64,8 @@ class ModelInitializeTest {
         logger.info(kupon1.getDescription());
         logger.info(kupon2.getDescription());
         logger.info(kupon3.getDescription());
+
+        assert true;
     }
 
     @Test
@@ -76,6 +82,8 @@ class ModelInitializeTest {
 
         logger.info(c1.getDescription());
         logger.info(c2.getDescription());
+
+        assert true;
     }
 
 }

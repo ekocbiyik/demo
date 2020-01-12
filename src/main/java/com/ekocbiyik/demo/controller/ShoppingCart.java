@@ -1,7 +1,7 @@
 package com.ekocbiyik.demo.controller;
 
 import com.ekocbiyik.demo.exceptions.DemoException;
-import com.ekocbiyik.demo.exceptions.DemoExceptionCode;
+import com.ekocbiyik.demo.exceptions.DemoExceptionCodeUtils;
 import com.ekocbiyik.demo.model.Campaign;
 import com.ekocbiyik.demo.model.Coupon;
 import com.ekocbiyik.demo.model.Product;
@@ -34,7 +34,7 @@ public class ShoppingCart implements IShoppingCartController {
     public void addItem(Product product, Integer quantity) throws DemoException {
 
         if (product == null || quantity == null) {
-            throw new DemoException(DemoExceptionCode.NULL_PARAMETER, "Null parameter Exception");
+            throw new DemoException(DemoExceptionCodeUtils.NULL_PARAMETER, "Null parameter Exception");
         }
 
         /*
@@ -51,7 +51,7 @@ public class ShoppingCart implements IShoppingCartController {
     public void applyDiscount(Campaign... newCampaigns) throws DemoException {
 
         if (newCampaigns == null || newCampaigns.length == 0) {
-            throw new DemoException(DemoExceptionCode.EMPTY_CAMPAIGN, "Empty campaign parameter Exception");
+            throw new DemoException(DemoExceptionCodeUtils.EMPTY_CAMPAIGN, "Empty campaign parameter Exception");
         }
 
         /*
@@ -65,7 +65,7 @@ public class ShoppingCart implements IShoppingCartController {
     @Override
     public void applyCoupon(Coupon coupon) throws DemoException {
         if (coupon == null) {
-            throw new DemoException(DemoExceptionCode.EMPTY_COUPON, "Empty coupon parameter Exception");
+            throw new DemoException(DemoExceptionCodeUtils.EMPTY_COUPON, "Empty coupon parameter Exception");
         }
         couponList.add(coupon);
         logger.info("Coupons updated!");

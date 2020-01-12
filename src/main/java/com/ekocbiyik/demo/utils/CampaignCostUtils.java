@@ -1,7 +1,7 @@
 package com.ekocbiyik.demo.utils;
 
 import com.ekocbiyik.demo.exceptions.DemoException;
-import com.ekocbiyik.demo.exceptions.DemoExceptionCode;
+import com.ekocbiyik.demo.exceptions.DemoExceptionCodeUtils;
 import com.ekocbiyik.demo.model.Campaign;
 import com.ekocbiyik.demo.model.Category;
 import com.ekocbiyik.demo.model.DiscountType;
@@ -138,7 +138,7 @@ public class CampaignCostUtils {
 
     private static Double validateCampaign(Double totalDiscount, Double totalAmount) throws DemoException {
         if (totalDiscount > totalAmount) {
-            throw new DemoException(DemoExceptionCode.INVALID_CAMPAIGN, "Invalid Campaign");
+            throw new DemoException(DemoExceptionCodeUtils.INVALID_CAMPAIGN, "Invalid Campaign");
         }
         return totalDiscount;
     }
