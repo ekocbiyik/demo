@@ -7,7 +7,6 @@ import com.ekocbiyik.demo.utils.DeliveryCostUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
