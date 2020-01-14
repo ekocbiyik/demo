@@ -24,6 +24,8 @@ public interface IShoppingCartController {
 
     Double getDeliveryCost();
 
+    Double getCost();
+
     void setDeliveryCost(Double deliveryCost);
 
     void print();

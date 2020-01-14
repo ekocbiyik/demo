@@ -10,6 +10,7 @@ import com.ekocbiyik.demo.thirdpart.wagu.Board;
 import com.ekocbiyik.demo.thirdpart.wagu.Table;
 import com.ekocbiyik.demo.utils.CampaignCostUtils;
 import com.ekocbiyik.demo.utils.CouponCostUtils;
+import com.ekocbiyik.demo.utils.DeliveryCostUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ public class ShoppingCart implements IShoppingCartController {
     private Set<Coupon> couponList = new HashSet<>();
     private Double totalAmount = 0.0;
     private Double couponDiscount = 0.0;
+    private Double campaignDiscount = 0.0;
     private Double deliveryCost = 0.0;
 
     @Override
@@ -43,8 +45,8 @@ public class ShoppingCart implements IShoppingCartController {
         Integer productCount = productList.get(product);
         productList.put(product, (productCount == null ? 0 : productCount) + quantity);
 
-        logger.info("Cart updated with {} x {}!", product.getProductName(), quantity);
-        refreshTotalAmount();
+        logger.info("Cart updated with {} x {}!", product.getProductTitle(), quantity);
+        refreshAmountCalculation();
     }
 
     @Override
@@ -59,7 +61,7 @@ public class ShoppingCart implements IShoppingCartController {
          */
         Arrays.asList(newCampaigns).forEach(newCmp -> campaignList.put(newCmp, 0.0));
         logger.info("Campaigns updated!");
-        refreshTotalAmount();
+        refreshAmountCalculation();
     }
 
     @Override
@@ -69,7 +71,7 @@ public class ShoppingCart implements IShoppingCartController {
         }
         couponList.add(coupon);
         logger.info("Coupons updated!");
-        refreshTotalAmount();
+        refreshAmountCalculation();
     }
 
     @Override
@@ -84,7 +86,7 @@ public class ShoppingCart implements IShoppingCartController {
 
     @Override
     public Double getCampaignDiscount() {
-        return applicableCampaignList.entrySet().stream().mapToDouble(Map.Entry::getValue).sum();
+        return campaignDiscount;
     }
 
     @Override
@@ -92,8 +94,9 @@ public class ShoppingCart implements IShoppingCartController {
         return deliveryCost;
     }
 
-    public void setDeliveryCost(Double deliveryCost) {
-        this.deliveryCost = deliveryCost;
+    @Override
+    public Double getCost() {
+        return getTotalAmountAfterDiscounts() + getDeliveryCost();
     }
 
     @Override
@@ -103,18 +106,20 @@ public class ShoppingCart implements IShoppingCartController {
         List<List<String>> rowsList = new ArrayList<>();
 
         productList.forEach((product, quantity) -> rowsList.add(Arrays.asList(
-                String.valueOf(product.getCategory().getCategoryName()),
-                String.valueOf(product.getProductName()),
+                String.valueOf(product.getCategory().getCategoryTitle()),
+                String.valueOf(product.getProductTitle()),
                 String.valueOf(quantity),
                 String.valueOf(product.getUnitPrize()),
                 String.valueOf(product.getUnitPrize() * quantity)
         )));
 
         rowsList.add(Arrays.asList(" ", " ", " ", " ", " "));
+        rowsList.add(Arrays.asList(" ", " ", " ", " ", " "));
         rowsList.add(Arrays.asList(" ", " ", " ", "TOTAL", String.valueOf(totalAmount)));
         rowsList.add(Arrays.asList(" ", " ", " ", "DISCOUNT", "-" + (getCouponDiscount() + getCampaignDiscount())));
+        rowsList.add(Arrays.asList(" ", " ", " ", "AFTER DISCOUNT", String.valueOf(getTotalAmountAfterDiscounts())));
         rowsList.add(Arrays.asList(" ", " ", " ", "DELIVERY COST", String.valueOf(getDeliveryCost())));
-        rowsList.add(Arrays.asList(" ", " ", " ", "COST", String.valueOf(getTotalAmountAfterDiscounts() + getDeliveryCost())));
+        rowsList.add(Arrays.asList(" ", " ", " ", "COST", String.valueOf(getCost())));
 
         Board board = new Board(140);
         Table table = new Table(board, 140, headersList, rowsList);
@@ -125,7 +130,11 @@ public class ShoppingCart implements IShoppingCartController {
         System.out.println(board.getPreview());
     }
 
-    private void refreshTotalAmount() throws DemoException {
+    public void setDeliveryCost(Double deliveryCost) {
+        this.deliveryCost = deliveryCost;
+    }
+
+    private void refreshAmountCalculation() throws DemoException {
 
         /*
          * her işlem adımında (kampanya ekle-çıkar, ürün ekle-çıkar vb.) tutarlar yeniden hesaplanır.
@@ -136,25 +145,24 @@ public class ShoppingCart implements IShoppingCartController {
 
         for (Map.Entry<Campaign, Double> campItem : campaignList.entrySet()) {
             Map<Product, Integer> products = CampaignCostUtils.getCampaignProducts(campItem.getKey(), productList);
-            campaignList.put(campItem.getKey(), CampaignCostUtils.calculateCampaignDiscount(campItem.getKey(), products));
+            campaignList.put(campItem.getKey(), CampaignCostUtils.calculateCampaignDiscountPerProduct(campItem.getKey(), products));
         }
 
-        // kampanyalar arasından en uygun olanları hesapla
+        // kampanyalar arasından en uygun olanları hesaplanır
         CampaignCostUtils.getApplicableCampaigns(campaignList).forEach(c -> applicableCampaignList.put(c, campaignList.get(c)));
 
         totalAmount = 0.0;
-        productList.forEach((product, quantity) -> totalAmount += product.getUnitPrize() * quantity);
-        couponDiscount = CouponCostUtils.calculateCouponDiscount(couponList, totalAmount);
-
-        logger.info("Total amount: {} recalculated!", totalAmount);
+        productList.forEach((product, quantity) -> totalAmount += product.getUnitPrize() * quantity);   // toplam fiyat
+        campaignDiscount = CampaignCostUtils.calculateCampaingDiscounts(applicableCampaignList);        // kampanya indirimleri
+        couponDiscount = CouponCostUtils.calculateCouponDiscount(couponList, (totalAmount - campaignDiscount)); // kupon indirimleri
     }
 
     public int getNumberOfProducts() {
-        return productList.entrySet().stream().mapToInt(Map.Entry::getValue).sum();
+        return productList.size();  // herbir farklı ürün miktarı
     }
 
     public int getNumberOfDeliveries() {
-        return productList.size();
+        return DeliveryCostUtils.getNumberOfDeliveries(productList.keySet()); // farklı kategorideki ürünler
     }
 
 }

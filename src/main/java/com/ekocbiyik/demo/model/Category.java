@@ -20,19 +20,23 @@ public class Category {
 
     private UUID id = UUID.randomUUID();
     private Category parent;
-    private String categoryName;
+    private String categoryTitle;
 
-    public Category(String categoryName) {
-        this.categoryName = categoryName;
+    public Category(String categoryTitle) {
+        this.categoryTitle = categoryTitle;
     }
 
-    public Category(Category parent, String categoryName) {
+    public Category(Category parent, String categoryTitle) {
         this.parent = parent;
-        this.categoryName = categoryName;
+        this.categoryTitle = categoryTitle;
     }
 
     public String getDescription() {
-        return parent == null ? categoryName : String.join(" > ", Arrays.asList(parent.getDescription(), categoryName));
+        return parent == null ? categoryTitle : String.join(" > ", Arrays.asList(parent.getDescription(), categoryTitle));
+    }
+
+    public static Category getRootCategory(Category category) {
+        return category.getParent() == null ? category : getRootCategory(category.getParent());
     }
 
 }

@@ -18,6 +18,10 @@ import java.util.stream.Collectors;
  */
 public class CampaignCostUtils {
 
+    public static Double calculateCampaingDiscounts(Map<Campaign, Double> applicableCampaignList) {
+        return applicableCampaignList.entrySet().stream().mapToDouble(Map.Entry::getValue).sum();
+    }
+
     public static Map<Product, Integer> getCampaignProducts(Campaign campaign, Map<Product, Integer> productList) {
 
         /* kampanyanın, kapsadığı kategorideki ürünleri döner */
@@ -31,7 +35,7 @@ public class CampaignCostUtils {
         return products;
     }
 
-    public static Double calculateCampaignDiscount(Campaign campaign, Map<Product, Integer> products) throws DemoException {
+    public static Double calculateCampaignDiscountPerProduct(Campaign campaign, Map<Product, Integer> products) throws DemoException {
 
         /* kampanyanın, kapsadığı kategorideki ürünlere sağladığı indirim tutarını döner
          * ürün sayısı, kampanyadaki sayı ile uyumlu olmalı
@@ -69,7 +73,7 @@ public class CampaignCostUtils {
 
             // kampanya categorisinin parentı başka bir kampanyanın parentı ile aynı mı?
             Map<Campaign, Double> sameRootCategoryCampaigns = campaignList.entrySet().stream()
-                    .filter(c -> (c.getKey() != currentCampaign.getKey()) && getRootCategory(c.getKey().getCategory()) == getRootCategory(currentCampaign.getKey().getCategory()))
+                    .filter(c -> (c.getKey() != currentCampaign.getKey()) && Category.getRootCategory(c.getKey().getCategory()) == Category.getRootCategory(currentCampaign.getKey().getCategory()))
                     .collect(Collectors.toMap(c -> c.getKey(), c -> c.getValue()));
 
             // eğer yoksa listeye eklenir
@@ -91,11 +95,6 @@ public class CampaignCostUtils {
                             applicableCampaigns.remove(currentCampaign);
                         }
                     } else {
-
-                        // parent'ı ortak olan daha uygun başka kategory var
-                        if (currentCampaign.getValue() < sameCategoryCamp.getValue()) {
-                            continue;
-                        }
 
                         // parentı değil ise aynı kategoride başka kampanya var mı?
                         Map<Campaign, Double> sameCategoryCampaigns = campaignList.entrySet().stream()
@@ -132,16 +131,11 @@ public class CampaignCostUtils {
         return category == campaign.getCategory() ? true : category.getParent() != null ? isCategoryChilOfCampaignCategory(campaign, category.getParent()) : false;
     }
 
-    private static Category getRootCategory(Category category) {
-        return category.getParent() == null ? category : getRootCategory(category.getParent());
-    }
-
     private static Double validateCampaign(Double totalDiscount, Double totalAmount) throws DemoException {
         if (totalDiscount > totalAmount) {
             throw new DemoException(DemoExceptionCodeUtils.INVALID_CAMPAIGN, "Invalid Campaign");
         }
         return totalDiscount;
     }
-
 
 }

@@ -19,7 +19,7 @@ public class Product {
     private UUID id = UUID.randomUUID();
 
     @NonNull
-    private String productName;
+    private String productTitle;
 
     @NonNull
     private Double unitPrize;
@@ -28,7 +28,7 @@ public class Product {
     private Category category;
 
     public String getDescription() {
-        return String.join(" > ", Arrays.asList(category.getDescription(), productName));
+        return String.join(" > ", Arrays.asList(category.getDescription(), productTitle));
     }
 
 }
